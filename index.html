@@ -15,8 +15,8 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 				<section>
-					<h1>Haskell 101</h1>
-					<h3>Or your first steps in the awesome &trade;</h3>
+					<h1>Haskell 102</h1>
+					<h3>Or your next steps in the awesome &trade;</h3>
 					<p>
 						<small>Brought to you by <a href="http://bazzle.me">Michal Kawalec</a></small>
 					</p>
@@ -30,267 +30,224 @@
 						<li>A text editor of your choice</li>
 						<li>And a terminal with `ghci` fired up</li>
 					</ul>
-
-				<!--	<aside class="notes">
-						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
-                        </aside>-->
 				</section>
 
                 <section>
                     <section>
-                        <h2>An intro to Haskell</h2>
+                        <h2>Working with types</h2>
+                        <p>Let's assume we have three types of clients:
                         <ul>
-                            <li>It's a pure functional language</li>
-                            <li>It's lazy unless you tell it not to</li>
-                            <li>It has mutable state if you want it to</li>
-                            <li>Has an awesome compiler</li>
-                            <li>Has a REPL!!1!</li>
-                            <li>It's strongly, statically typed (that can be awesome, depends)</li>
+                            <li>A governmental organisation is defined by its name.</li>
+                            <li>A company needs a name, id number, name of a responsible person and her positon in the company.</li>
+                            <li>A person with a first and last names and an information on if they want to receive further information.</li>
                         </ul>
+                        </p>
+
+                        <pre><code class='hs'>
+data Client = GovOrg String
+            | Company String Integer String String
+            | Individual String String Bool
+                        </code></pre>
+                        <pre><code class='hs'>
+Prelude> :l src/Example.hs
+Prelude Example> :t GovOrg "Nasa"
+Prelude Example> :t Company "SuperComp" 0 "John Smith" "CEO"
+</code></pre>
                     </section>
-
+                    
                     <section>
-                        <h3>Let's write some stuff</h3>
-
-                        <p>Inside GHCI do:</p>
-					    <pre><code class='hs'>
-                        Prelude> 13 * 2343432434234
-                        Prelude> 1/9 + 1 + sqrt 11
-                        </code></pre>
-                         
-                        <p><small>But wait, there is (much) more</small></p>
+                        <p>There are some problems with that though:</p>
                         <pre><code class='hs'>
-                        Prelude> :{
-                        Prelude| 1/2 +
-                        Prelude| 1/3
-                        Prelude| :}
+Prelude Example> Individual "John" "Smith" True
                         </code></pre>
 
-                        <p><small>And it even has errors</small></p>
+                        <p>Let's make the compiler write the showing code for us</p>
                         <pre><code class='hs'>
-                        Prelude> "hi" / 10
-                        </code></pre>
-
-                        <p><small>Or not...</small></p>
-                        <pre><code class='hs'>
-                        Prelude> 10 / 0
-                        Prelude> :quit
-                        </code></pre>
-                    </section>
-
-                    <section>
-                        <h3>Characters</h3>
-                        <pre><code class=hs'>
-                        Prelude> :t 'a'
-                        Prelude> import Data.Char
-                        Prelude Data.Char> :t toUpper
-                        Prelude Data.Char> chr 99
-                        Prelude Data.Char> :t chr
-                        Prelude Data.Char> chr 'C'
+data Client = GovOrg String
+            | Company String Integer String String
+            | Individual String String Bool
+            deriving Show
                         </code></pre>
                     </section>
 
                     <section>
-                        <h3>Numbers</h3>
+                        <p>Also, we should be able to abstract away the part that defines a person</p>
                         <pre><code class='hs'>
-                        Prelude> 1 % 9
-                        -- Oh noes!
-                        Prelude> import Data.Ratio
-                        Prelude Data.Ratio> 1 % 9 + 0.1
-                        Prelude Data.Ratio> toRational 1.3
-                        Prelude Data.Ratio> fromRational (toRational 1.3)
-                        Prelude Data.Ratio> tan -4
-                        -- WAT?
-                        </code></pre>
+data Client = GovOrg String
+            | Company String Integer Person String
+            | Individual Person Bool
+            deriving Show
 
-                        <p>What about strings?</p>
-                        <pre><code class='hs'>
-                        Prelude Data.Char> :t "Hi world!"
-                        </code></pre>
-                    </section>
-                </section>
-
-                <section>
-                    <section>
-                        <h2>Lists</h2>
-                        <pre><code class='hs'>
-                        Prelude> :t [4,1,6]
-                        Prelude> :t (++)
-                        Prelude> reverse [1,2,3]
-                        Prelude> reverse "abc"
-                        Prelude> [1,2,3] ++ [4,5,6]
-                        </code></pre>
-
-                        <p>There are some limitations:</p>
-                        <pre><code class='hs'>
-                        Prelude> [1,2,3,'c',"HI"]
-                        Prelude> "abc" ++ [1,2,3]
-                        </code></pre>
-                    </section>
-
-                    <section>
-                        <h3>List operations</h3>
-                        <pre><code class='hs'>
-                        Prelude> 1 : 2 : 3 : []
-                        Prelude> :t [[[2], [3,4]]]
-                        Prelude> or [False, False, and [False, True, True]]
-                        Prelude> head [1,2,3]
-                        Prelude> tail [1,2,3]
-                        Prelude> (head [1,2,3]) ++ (tail [1,2,3])
-                        -- Oh noes!
-                        </code></pre>
-                    </section>
-                </section>
-
-                <section>
-                    <section>
-                        <h2>Fun with Fun<small>ctions</small></h2>
-                        <p>Let's define a simple function</p>
-                        <pre><code class='hs'>
-                        Prelude> let firstOrEmpty lst = if not (null lst) then head lst else "empty"
-                        Prelude> firstOrEmpty []
-                        Prelude> firstOrEmpty ["sadasdsa", "ttrgkfd"]
-                        </code></pre>
-                    </section>
-
-                    <section>
-                        <h3>To give things more structure, we'll create a new (sandboxed) project</h3>
-                        <pre><code class='bash'>
-                        $ cd your/project/path
-                        $ mkdir haskell101
-                        $ cd haskell101
-                        $ cabal init
-                        $ mkdir src
-                        </code></pre>
+data Person = Person String String
+            deriving Show
+            </code></pre>
+                        <ul>
+                            <li>In a module all constructors must have different names</li>
+                            <li>Types and constructor names don't collide, like in Person</li>
+                            <li>All types must be showable for a type to be showable</li>
+                        </ul>
                         
-                        <p>To make a module we would put at the beginning of a file in src/Example.hs:</p>
+                    </section>
+
+                    <section>
+                        <p>We can not add any more information than the constructor name</p>
                         <pre><code class='hs'>
-                        module Example where
+data Gender = Male | Female | Unknown
                         </code></pre>
 
-                        <p>And inside haskell101.cabal:</p>
+                        <p>And so:</p>
                         <pre><code class='hs'>
-                        library
-                            ...
-                            hs-source-dirs: src
-                            exposed-modules: Example
-                            ghc-options: -Wall
+data Person = Person String String Gender
+            deriving Show
+                        </code></pre>
+
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>Pattern matching revisited</h2>
+                        <p>We could do it like that:</p>
+                        <pre><code class='hs'>
+clientName :: Client -> String
+clientName client = case client of
+                        GovOrg name                 -> name
+                        Company name id person resp -> name
+                        Individual person ads       ->
+                            case person of Person fName lName gender -> fName ++ " " ++ lName
+                        </code></pre>
+                        <p><small>But it doesn't look fun, does it?</small></p>
+                    </section>
+
+                    <section>
+                        <p>Let's shorten the last match</p>
+                        <pre><code class='hs'>
+clientName :: Client -> String
+clientName client = case client of
+                        -- some more patterns
+                        Individual (Person fName lName _) _ -> fName ++ " " ++ lName
                         </code></pre>
                     </section>
 
                     <section>
-                        <p>Let's put the previous function in a module. Open src/Example.hs</p>
+                        <p>Sometimes there is a case we don't know what to return</p>
                         <pre><code class='hs'>
-                        module Example where
-
-                        firstOrEmpty lst = if not (null lst) then head lst else "empty"
-                        </code></pre>
-
-                        <p>And from ghci</p>
-                        <pre><code class='hs'>
-                        Prelude> :l src/Example
-                        Prelude Example> firstOrEmpty []
-                        </code></pre>
-                        <h1>YEAH!</h1>
-                    </section>
-
-                    <section>
-                        <p>Specifying a type is a piece of cake</p>
-                        <pre><code class='hs'>
-                        firstOrEmpty :: [[Char]] -> [Char]
-                        firstOrEmpty lst = if not (null lst) then head lst else "empty"
-                        </code></pre>
-
-                        <p>Let's define our own concatenation operator</p>
-                        <pre><code class='hs'>
-                        lst1 +++ lst2 = if null lst1
-                                        then lst2 
-                                        else (head lst1) : (tail lst1 +++ lst2)
-                        </code></pre>
-
-                        <p>And a reverse operation</p>
-                        <pre><code class='hs'>
-                        reverse' list = if null list
-                                        then []
-                                        else reverse' (tail list) +++ [head list]
+companyName :: Client -> Maybe String
+companyName client = case client of
+                        Company name _ _ _ -> Just name
+                        _                  -> Nothing
                         </code></pre>
                     </section>
 
                     <section>
-                        <p>Let's do something much more fun. Pattern matching!</p>
-                        <pre><code class='hs'>
-                        fib :: Int -> Integer
-                        fib 0 = 0
-                        fib 1 = 1
-                        fib n = fib (n-1) + fib (n-2)
-                        </code></pre>
-
-                        <p>What about our previous example?</p>
-                        <pre><code class='hs'>
-                        (+++) :: [a] -> [a] -> [a]
-                        list1 +++ list2 = case list1 of
-                                            []   -> list2
-                                            x:xs -> x:(xs +++ list2)
-                        </code></pre>
-                        <h1>FULL AWESOME!</h1>
-                        <p><small>Want more awesome?</small></p>
-                    </section>
-
-                    <section>
-                        <img src="yo.jpg" alt="YO"></img>
-                    </section>
-
-                    <section>
-                        <p>But first a tiny tiny thing: List Comprehensions</p>
-                        <pre><code class='hs'>
-                        Prelude> [x * 2 | x <- [1..10]]
-                        Prelude> [x | x <- [1..]]] -- ctrl+c :P
-                        Prelude> [(x, y, z) | let r=[1..10], x <- r, y <- r, z <- r, x ** 2 + y ** 2 == z ** 2]
-                        </code></pre>
-                        <p>Simple, right? Let's move to the awesome...</p>
-                    </section>
-
-
-                    <section>
-                        <pre><code class='hs'>
-                        qsort :: Ord a => [a] -> [a]
-                        qsort []     = []
-                        qsort (x:xs) = (qsort [y | y <- xs, y < x]) ++ [x] ++ (qsort [y | y <- xs, y >= x])
-                        </code></pre>
+                        <h3>Guards!</h3>
+                        <p>Another fibonacci</p>
 
                         <pre><code class='hs'>
-                        Prelude Example> qsort [4,23,7,21,6,32,5,651,6,132,6,-1]
+fibonacci' n | n < 0     = Nothing
+fibonacci' 0             = Just 0
+fibonacci' 1             = Just 1
+fibonacci' n | otherwise = let (Just f1, Just f2) = (fibonacci' (n-1), fibonacci' (n-2))
+                           in Just (f1 + f2)
+                                  </code></pre>
+                        <p><small>It can do so much more!</small></p>
+
+                        <pre><code class='hs'>
+multipleOf :: Integer -> Integer -> Bool
+multipleOf x y = (mod x y) == 0
+
+superMultiples :: Integer -> String
+superMultiples n
+    | multipleOf n 2  = show n ++ " is a multiple of 2"
+    | multipleOf n 3  = show n ++ " is a multiple of 3"
+    | multipleOf n 11 = show n ++ " is a multiple of 11!!1!"
+    | otherwise       = show n ++ " is not really interesting:("
                         </code></pre>
                     </section>
                 </section>
 
+                <section>
+                    <section>
+                        <h2>Cool stuff</h2>
+                        <h3>View patterns</h3>
+                        <p>What if we want to preprocess the value before returning?</p>
+                        <pre><code class='hs'>
+specialClient :: Client -> Bool
+specialClient (clientName -> "John") = True
+specialClient _                      = False
+                        </code></pre>
 
+                        <p><small>But this doesn't work. Let's add a pragma</small></p>
+                        <pre><code class='hs'>
+{-# LANGUAGE ViewPatterns #-}
+                        </code></pre>
+
+                        <p><small>Or inside the interpreter</small></p>
+                        <pre><code class='hs'>
+Prelude> :set -XViewPatterns
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Records</h3>
+                        <p>Writing all the functions to get the individual values can get ridiculous, let's fix that</p>
+                        <pre><code class='hs'>
+data ClientR = GovOrgR { clientRName :: String }
+             | CompanyR { clientRName :: String
+                        , companyId :: Integer
+                        , person :: PersonR
+                        , duty :: String }
+             | IndividualR { person :: PersonR }
+             deriving Show
+
+data PersonR = PersonR { firstName :: String
+                       , lastName :: String
+                       } deriving Show
+                        </code></pre>
+
+                        <p><small>Now we can play</small></p>
+                        <pre><code class='hs'>
+Prelude> IndividualR { person = PersonR { lastName = "Smith", firstName = "John"} }
+Prelude> :t duty
+                        </code></pre>
+
+                    </section>
+
+                    <section>
+                        <p>Now we can pattern match without _s</p>
+                        <pre><code class='hs'>
+greet :: ClientR -> String
+greet IndividualR { person = PersonR { firstName = fn } } = "Hi, " ++ fn
+greet CompanyR    { clientRName = c}                      = "Hello, " ++ c
+greet GovOrgR     { }                                     = "Yeah, hi"
+
+                        </code></pre>
+
+                        <p>Even better, we can enable <code>RecordWildCards</code> and get the bindings for free</p>
+
+                        <pre><code class='hs'>
+greet IndividualR { person = PersonR { .. } } = "Hi, " ++ firstName
+greet CompanyR    { .. }                      = "Hello, " ++ clientRName
+greet GovOrgR     { }                         = "Welcome"
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h3>Homework</h3>
+                        <pre><code class='hs'>
+nameInCapitals :: PersonR -> PersonR
+nameInCapitals p@(PersonR { firstName = initial:rest }) =
+        let newName = (to Upper):rest
+        in p { firstName = newName }
+nameInCapitals p@(PersonR { firstName = "" }) = p
+                        </code></pre>
+                </section>
 
 				<section>
 					<h1>THE END</h1>
 					<h3>BY Michal Kawalec / michal@bazzle.me</h3>
 
-                    <p>Next time:</p>
-                    <ul>
-                        <li>Data types</li>
-                        <li>Higher order functions</li>
-                        <li>Combining functions</li>
-                        <li>more LISTS!</li>
-                    </ul>
 				</section>
-
-                <section>
-                    <pre><code class='hs'>
-                    Prelude Example> :set +s
-                    Prelude Example> qsort [1e3,1e3-1..1]
-                    $ ghci -fobject-code
-                    Prelude> :l src/Example
-                    Prelude Example> :set +s
-                    Prelude Example> qsort [1e3,1e3-1..1]
-                    </code></pre>
-                </section>
-
-
 			</div>
 
 		</div>
